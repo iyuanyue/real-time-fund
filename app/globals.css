@@ -717,6 +717,12 @@ input[type="number"] {
     color: var(--muted);
     background: transparent;
   }
+  .tab.active,
+  .tab.active:hover {
+    background: rgba(34, 211, 238, 0.15);
+    color: var(--primary);
+    box-shadow: none;
+  }
 }
 
 .modal-overlay {
