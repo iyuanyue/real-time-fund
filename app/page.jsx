@@ -363,9 +363,10 @@ function DatePicker({ value, onChange }) {
             }}
           >
             <div className="calendar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-              <button onClick={handlePrevMonth} className="icon-button" style={{ width: 24, height: 24 }}>&lt;</button>
+              <button type="button" onClick={handlePrevMonth} className="icon-button" style={{ width: 24, height: 24 }}>&lt;</button>
               <span style={{ fontWeight: 600 }}>{year}年 {month + 1}月</span>
               <button
+                type="button"
                 onClick={handleNextMonth}
                 className="icon-button"
                 style={{ width: 24, height: 24 }}

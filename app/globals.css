@@ -712,6 +712,13 @@ input[type="number"] {
   box-shadow: none;
 }
 
+@media (hover: none) {
+  .tab:hover {
+    color: var(--muted);
+    background: transparent;
+  }
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
