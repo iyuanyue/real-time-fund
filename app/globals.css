@@ -93,7 +93,7 @@ body {
 
 .navbar {
   position: fixed;
-  top: 16px;
+  top: 0;
   left: 16px;
   right: 16px;
   z-index: 50;
@@ -177,6 +177,41 @@ body {
   height: auto;
 }
 
+/* Mobile Search Logic */
+@media (max-width: 640px) {
+  /* Default: Search hidden, Trigger visible */
+  .navbar-add-fund {
+    display: none;
+  }
+
+  .mobile-search-btn {
+    display: inline-flex !important;
+  }
+
+  /* When search focused/active */
+  .brand.search-focused-sibling {
+    display: none !important;
+  }
+
+  .actions.search-focused-sibling {
+    display: none !important;
+  }
+
+  .navbar-add-fund.search-focused {
+    display: flex !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    flex: 1;
+    margin-top: 0 !important;
+  }
+}
+
+/* Desktop: Trigger hidden */
+.mobile-search-btn {
+  display: none;
+}
+
+
 .navbar-input-field {
   flex: 1;
   min-width: 120px;
@@ -198,7 +233,7 @@ body {
 }
 
 .content {
-  padding-top: 100px;
+  /*padding-top: 100px;*/
 }
 
 @media (max-width: 640px) {
@@ -766,7 +801,6 @@ input[type="number"] {
 .filter-bar {
   transition: all 0.3s ease;
   position: sticky;
-  top: 90px;
   z-index: 40;
   background: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(12px);

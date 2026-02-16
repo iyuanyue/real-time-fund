@@ -1726,7 +1726,7 @@ function CountUp({ value, prefix = '', suffix = '', decimals = 2, className = ''
   );
 }
 
-function GroupSummary({ funds, holdings, groupName, getProfit }) {
+function GroupSummary({ funds, holdings, groupName, getProfit, stickyTop }) {
   const [showPercent, setShowPercent] = useState(true);
   const [isMasked, setIsMasked] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
@@ -1791,7 +1791,7 @@ function GroupSummary({ funds, holdings, groupName, getProfit }) {
   if (!summary.hasHolding) return null;
 
   return (
-    <div className={isSticky ? "group-summary-sticky" : ""}>
+    <div className={isSticky ? "group-summary-sticky" : ""} style={isSticky && stickyTop ? { top: stickyTop } : {}}>
     <div className="glass card group-summary-card" style={{ marginBottom: 8, padding: '16px 20px', background: 'rgba(255, 255, 255, 0.03)', position: 'relative' }}>
       <span
         className="sticky-toggle-btn"
@@ -1944,25 +1944,42 @@ export default function HomePage() {
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef(null);
   const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [addResultOpen, setAddResultOpen] = useState(false);
   const [addFailures, setAddFailures] = useState([]);
 
-  // 动态计算 Navbar 高度
+  // 动态计算 Navbar 和 FilterBar 高度
   const navbarRef = useRef(null);
+  const filterBarRef = useRef(null);
   const [navbarHeight, setNavbarHeight] = useState(0);
+  const [filterBarHeight, setFilterBarHeight] = useState(0);
 
   useEffect(() => {
-    const updateNavbarHeight = () => {
+    const updateHeights = () => {
       if (navbarRef.current) {
         setNavbarHeight(navbarRef.current.offsetHeight);
       }
+      if (filterBarRef.current) {
+        setFilterBarHeight(filterBarRef.current.offsetHeight);
+      }
     };
 
-    updateNavbarHeight();
-    window.addEventListener('resize', updateNavbarHeight);
-    return () => window.removeEventListener('resize', updateNavbarHeight);
-  }, []);
+    // 初始延迟一下，确保渲染完成
+    const timer = setTimeout(updateHeights, 100);
+    window.addEventListener('resize', updateHeights);
+    return () => {
+      window.removeEventListener('resize', updateHeights);
+      clearTimeout(timer);
+    };
+  }, [groups, currentTab]); // groups 或 tab 变化可能导致 filterBar 高度变化
+  const handleMobileSearchClick = () => {
+    setIsSearchFocused(true);
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  };
+
   const [holdingModal, setHoldingModal] = useState({ open: false, fund: null });
   const [actionModal, setActionModal] = useState({ open: false, fund: null });
   const [tradeModal, setTradeModal] = useState({ open: false, fund: null, type: 'buy' }); // type: 'buy' | 'sell'
@@ -3777,6 +3794,7 @@ export default function HomePage() {
                     </div>
                   )}
                   <input
+                    ref={inputRef}
                     className="navbar-input-field"
                     placeholder="搜索基金名称或代码..."
                     value={searchTerm}
@@ -3824,6 +3842,7 @@ export default function HomePage() {
                           <div
                             key={fund.CODE}
                             className={`search-item ${isSelected ? 'selected' : ''} ${isAlreadyAdded ? 'added' : ''}`}
+                            onMouseDown={(e) => e.preventDefault()}
                             onClick={() => {
                               if (isAlreadyAdded) return;
                               toggleSelectFund(fund);
@@ -3865,6 +3884,19 @@ export default function HomePage() {
             </div>
           )}
           <img alt="项目Github地址" src={githubImg.src} style={{ width: '30px', height: '30px', cursor: 'pointer' }} onClick={() => window.open("https://github.com/hzm0321/real-time-fund")} />
+          {isMobile && (
+            <button
+              className="icon-button mobile-search-btn"
+              aria-label="搜索基金"
+              onClick={handleMobileSearchClick}
+              title="搜索"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+                <path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </button>
+          )}
           <div className="badge" title="当前刷新频率">
             <span>刷新</span>
             <strong>{Math.round(refreshMs / 1000)}秒</strong>
@@ -3994,7 +4026,7 @@ export default function HomePage() {
 
       <div className="grid">
         <div className="col-12">
-          <div className="filter-bar" style={{ top: navbarHeight + 16, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div ref={filterBarRef} className="filter-bar" style={{ top: isMobile ? undefined : navbarHeight , marginTop: navbarHeight, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <div className="tabs-container">
               <div
                 className="tabs-scroll-area"
@@ -4158,6 +4190,7 @@ export default function HomePage() {
                   holdings={holdings}
                   groupName={getGroupName()}
                   getProfit={getHoldingProfit}
+                  stickyTop={navbarHeight + filterBarHeight + (isMobile ? -2 : 0)}
                 />
 
               {currentTab !== 'all' && currentTab !== 'fav' && (
